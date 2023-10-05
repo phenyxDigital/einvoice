@@ -282,7 +282,7 @@ class Invoice {
 
         // Validate preset classname
 
-        if (!is_subclass_of($preset, AbstractPreset::)) {
+        if (!is_subclass_of($preset, AbstractPreset::class)) {
             throw new InvalidArgumentException("$preset is not a valid invoice preset");
         }
 

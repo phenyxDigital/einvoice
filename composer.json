@@ -1,0 +1,22 @@
+{
+    "name": "phenyxdigitale/e-invoice",
+    "description": "Library for reading and creating European-compliant electronic invoices (EN 16931)",  
+    "homepage": "https://github.com/phenyxdigitale/e-invoice",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jeff Hunger",
+            "homepage": "https://ephenyx.com"
+        }
+    ],    
+    "require": {
+        "php": "^8.0",
+        "josemmo/uxml": "^0.1.4"
+    },  
+	"autoload": {
+		 "psr-4": {
+            "PhenyxInvoicing\\": "src/"
+        }
+	}
+}

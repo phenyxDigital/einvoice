@@ -1,31 +1,32 @@
 <?php
 namespace PhenyxInvoicing\Traits;
 
-use PhenyxInvoicing\Attachment;
 use OutOfBoundsException;
+use PhenyxInvoicing\Attachment;
 
 trait AttachmentsTrait {
+
     protected $attachments = [];
 
     /**
      * Get attachments
      * @return Attachment[] Array of attachments
      */
-    public function getAttachments(): array {
+    public function getAttachments(): array{
+
         return $this->attachments;
     }
-
 
     /**
      * Add attachment
      * @param  Attachment $attachment Attachment
      * @return self                   This instance
      */
-    public function addAttachment(Attachment $attachment): self {
+    public function addAttachment(Attachment $attachment): self{
+
         $this->attachments[] = $attachment;
         return $this;
     }
-
 
     /**
      * Remove attachment
@@ -34,20 +35,23 @@ trait AttachmentsTrait {
      * @throws OutOfBoundsException if attachment index is out of bounds
      */
     public function removeAttachment(int $index): self {
+
         if ($index < 0 || $index >= count($this->attachments)) {
             throw new OutOfBoundsException('Could not find attachment by index');
         }
+
         array_splice($this->attachments, $index, 1);
         return $this;
     }
-
 
     /**
      * Clear all attachments
      * @return self This instance
      */
-    public function clearAttachments(): self {
+    public function clearAttachments(): self{
+
         $this->attachments = [];
         return $this;
     }
+
 }

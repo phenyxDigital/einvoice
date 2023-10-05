@@ -2,6 +2,7 @@
 namespace PhenyxInvoicing\Models;
 
 class VatBreakdown {
+
     /**
      * VAT category code
      * @var string

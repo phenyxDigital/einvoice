@@ -5,6 +5,7 @@ use PhenyxInvoicing\Traits\IdentifiersTrait;
 use PhenyxInvoicing\Traits\PostalAddressTrait;
 
 class Party {
+
     protected $electronicAddress = null;
     protected $name = null;
     protected $tradingName = null;

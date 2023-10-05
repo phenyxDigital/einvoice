@@ -4,6 +4,7 @@ namespace PhenyxInvoicing\Exceptions;
 use Exception;
 
 class ValidationException extends Exception {
+    
     protected $businessRuleId;
 
     /**
@@ -12,8 +13,10 @@ class ValidationException extends Exception {
      * @param string|null $brId    Business rule ID
      */
     public function __construct(string $message, ?string $brId=null) {
+        
         $this->businessRuleId = $brId;
         parent::__construct($message);
+        
     }
 
 
@@ -22,6 +25,7 @@ class ValidationException extends Exception {
      * @return string|null Business rule ID
      */
     public function getBusinessRuleId(): ?string {
+        
         return $this->businessRuleId;
     }
 }

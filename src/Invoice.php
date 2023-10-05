@@ -2,6 +2,8 @@
 namespace PhenyxInvoicing;
 
 use DateTime;
+use InvalidArgumentException;
+use OutOfBoundsException;
 use PhenyxInvoicing\Models\InvoiceTotals;
 use PhenyxInvoicing\Payments\Payment;
 use PhenyxInvoicing\Presets\AbstractPreset;
@@ -11,15 +13,10 @@ use PhenyxInvoicing\Traits\BuyerAccountingReferenceTrait;
 use PhenyxInvoicing\Traits\InvoiceValidationTrait;
 use PhenyxInvoicing\Traits\PeriodTrait;
 use PhenyxInvoicing\Traits\PrecedingInvoiceReferencesTrait;
-use InvalidArgumentException;
-use OutOfBoundsException;
-use function array_splice;
-use function count;
-use function is_subclass_of;
-use function round;
 
 /** @phan-suppress PhanUnreferencedPublicClassConstant */
 class Invoice {
+
     const DEFAULT_DECIMALS = 8;
 
     /**
@@ -203,7 +200,7 @@ class Invoice {
 
     /**
      * Credit note related to goods or services
-     * 
+     *
      * Document message used to provide credit information related to a transaction for goods or services to the
      * relevant party.
      */
@@ -211,7 +208,7 @@ class Invoice {
 
     /**
      * Credit note related to financial adjustments
-     * 
+     *
      * Document message for providing credit information related to financial adjustments to the relevant party,
      * e.g., bonuses.
      */
@@ -219,21 +216,21 @@ class Invoice {
 
     /**
      * Credit note
-     * 
+     *
      * Document/message for providing credit information to the relevant party.
      */
     const TYPE_CREDIT_NOTE = 381;
 
     /**
      * Factored credit note
-     * 
+     *
      * Credit note related to assigned invoice(s).
      */
     const TYPE_FACTORED_CREDIT_NOTE = 396;
 
     /**
      * Forwarder's credit note
-     * 
+     *
      * Document/message for providing credit information to the relevant party.
      */
     const TYPE_FORWARDERS_CREDIT_NOTE = 532;
@@ -277,13 +274,18 @@ class Invoice {
      * @param string|null $preset Preset classname or NULL for blank invoice
      * @throws InvalidArgumentException if not a valid preset
      */
-    public function __construct(?string $preset=null) {
-        if ($preset === null) return;
+    public function __construct( ? string $preset = null) {
+
+        if ($preset === null) {
+            return;
+        }
 
         // Validate preset classname
-        if (!is_subclass_of($preset, AbstractPreset::class)) {
+
+        if (!is_subclass_of($preset, AbstractPreset::)) {
             throw new InvalidArgumentException("$preset is not a valid invoice preset");
         }
+
         /** @var AbstractPreset */
         $this->preset = new $preset();
 
@@ -292,16 +294,15 @@ class Invoice {
         $this->preset->setupInvoice($this);
     }
 
-
     /**
      * Get number of decimal places for a given field
      * @param  string $field Field name
      * @return int           Number of decimal places
      */
-    public function getDecimals(string $field): int {
+    public function getDecimals(string $field) : int {
+
         return $this->roundingMatrix[$field] ?? $this->roundingMatrix[''] ?? self::DEFAULT_DECIMALS;
     }
-
 
     /**
      * Round value
@@ -309,225 +310,227 @@ class Invoice {
      * @param  string $field Field name
      * @return float         Rounded value
      */
-    public function round(float $value, string $field): float {
+    public function round(float $value, string $field): float{
+
         $rounded = round($value, $this->getDecimals($field));
+
         if ($rounded == 0) {
             $rounded += 0; // To fix negative zero
         }
+
         return $rounded;
     }
-
 
     /**
      * Set rounding matrix
      * @param  array $matrix Rounding matrix
      * @return self          Invoice instance
      */
-    public function setRoundingMatrix(array $matrix): self {
+    public function setRoundingMatrix(array $matrix): self{
+
         $this->roundingMatrix = $matrix;
         return $this;
     }
-
 
     /**
      * Get specification identifier
      * @return string|null Specification identifier
      */
-    public function getSpecification(): ?string {
+    public function getSpecification():  ? string {
+
         return $this->specification;
     }
-
 
     /**
      * Set specification identifier
      * @param  string $specification Specification identifier
      * @return self                  Invoice instance
      */
-    public function setSpecification(string $specification): self {
+    public function setSpecification(string $specification) : self{
+
         $this->specification = $specification;
         return $this;
     }
-
 
     /**
      * Get business process type
      * @return string|null Business process type
      */
-    public function getBusinessProcess(): ?string {
+    public function getBusinessProcess():  ? string {
+
         return $this->businessProcess;
     }
-
 
     /**
      * Set business process type
      * @param  string|null $businessProcess Business process type
      * @return self                         Invoice instance
      */
-    public function setBusinessProcess(?string $businessProcess): self {
+    public function setBusinessProcess( ? string $businessProcess) : self{
+
         $this->businessProcess = $businessProcess;
         return $this;
     }
-
 
     /**
      * Get invoice number
      * @return string|null Invoice number
      */
-    public function getNumber(): ?string {
+    public function getNumber() :  ? string {
+
         return $this->number;
     }
-
 
     /**
      * Set invoice number
      * @param  string $number Invoice number
      * @return self           Invoice instance
      */
-    public function setNumber(string $number): self {
+    public function setNumber(string $number) : self{
+
         $this->number = $number;
         return $this;
     }
-
 
     /**
      * Get invoice type code
      * @return int Invoice type code
      */
     public function getType(): int {
+
         return $this->type;
     }
-
 
     /**
      * Set invoice type code
      * @param  int  $typeCode Invoice type code
      * @return self           Invoice instance
      */
-    public function setType(int $typeCode): self {
+    public function setType(int $typeCode): self{
+
         $this->type = $typeCode;
         return $this;
     }
-
 
     /**
      * Get document currency code
      * @return string Document currency code
      */
     public function getCurrency(): string {
+
         return $this->currency;
     }
-
 
     /**
      * Set document currency code
      * @param  string $currencyCode Document currency code
      * @return self                 Invoice instance
      */
-    public function setCurrency(string $currencyCode): self {
+    public function setCurrency(string $currencyCode): self{
+
         $this->currency = $currencyCode;
         return $this;
     }
-
 
     /**
      * Get VAT accounting currency code
      * @return string|null VAT accounting currency code or NULL if same as document's
      */
-    public function getVatCurrency(): ?string {
+    public function getVatCurrency():  ? string {
+
         return $this->vatCurrency;
     }
-
 
     /**
      * Set VAT accounting currency code
      * @param  string|null $currencyCode VAT accounting currency code or NULL if same as document's
      * @return self                      Invoice instance
      */
-    public function setVatCurrency(?string $currencyCode): self {
+    public function setVatCurrency( ? string $currencyCode) : self{
+
         $this->vatCurrency = $currencyCode;
         return $this;
     }
-
 
     /**
      * Get invoice issue date
      * @return DateTime|null Invoice issue date
      */
-    public function getIssueDate(): ?DateTime {
+    public function getIssueDate() :  ? DateTime {
+
         return $this->issueDate;
     }
-
 
     /**
      * Set invoice issue date
      * @param  DateTime $issueDate Invoice issue date
      * @return self                Invoice instance
      */
-    public function setIssueDate(DateTime $issueDate): self {
+    public function setIssueDate(DateTime $issueDate) : self{
+
         $this->issueDate = $issueDate;
         return $this;
     }
-
 
     /**
      * Get payment due date
      * @return DateTime|null Payment due date
      */
-    public function getDueDate(): ?DateTime {
+    public function getDueDate():  ? DateTime {
+
         return $this->dueDate;
     }
-
 
     /**
      * Set payment due date
      * @param  DateTime|null $dueDate Payment due date
      * @return self                   Invoice instance
      */
-    public function setDueDate(?DateTime $dueDate): self {
+    public function setDueDate( ? DateTime $dueDate) : self{
+
         $this->dueDate = $dueDate;
         return $this;
     }
-
 
     /**
      * Get tax point date
      * @return DateTime|null Tax point date
      */
-    public function getTaxPointDate(): ?DateTime {
+    public function getTaxPointDate() :  ? DateTime {
+
         return $this->taxPointDate;
     }
-
 
     /**
      * Set tax point date
      * @param  DateTime|null $taxPointDate Tax point date
      * @return self                        Invoice instance
      */
-    public function setTaxPointDate(?DateTime $taxPointDate): self {
+    public function setTaxPointDate( ? DateTime $taxPointDate) : self{
+
         $this->taxPointDate = $taxPointDate;
         return $this;
     }
-
 
     /**
      * Get invoice notes
      * @return string[] Invoice notes
      */
-    public function getNotes(): array {
+    public function getNotes() : array{
+
         return $this->notes;
     }
-
 
     /**
      * Add invoice note
      * @param  string $note Invoice note
      * @return self         Invoice instance
      */
-    public function addNote(string $note): self {
+    public function addNote(string $note): self{
+
         $this->notes[] = $note;
         return $this;
     }
-
 
     /**
      * Remove invoice note
@@ -536,23 +539,24 @@ class Invoice {
      * @throws OutOfBoundsException if invoice note index is out of bounds
      */
     public function removeNote(int $index): self {
+
         if ($index < 0 || $index >= count($this->notes)) {
             throw new OutOfBoundsException('Could not find invoice note by index');
         }
+
         array_splice($this->notes, $index, 1);
         return $this;
     }
-
 
     /**
      * Clear all invoice notes
      * @return self Invoice instance
      */
-    public function clearNotes(): self {
+    public function clearNotes(): self{
+
         $this->notes = [];
         return $this;
     }
-
 
     /**
      * Get invoice note
@@ -560,10 +564,10 @@ class Invoice {
      * @deprecated 0.2.1
      * @see Invoice::getNotes()
      */
-    public function getNote(): ?string {
+    public function getNote():  ? string {
+
         return $this->notes[0] ?? null;
     }
-
 
     /**
      * Set invoice note
@@ -572,292 +576,292 @@ class Invoice {
      * @deprecated 0.2.1
      * @see Invoice::addNote()
      */
-    public function setNote(?string $note): self {
+    public function setNote( ? string $note) : self{
+
         // @phan-suppress-next-line PhanPartialTypeMismatchProperty
         $this->notes = ($note === null) ? [] : [$note];
         return $this;
     }
 
-
     /**
      * Get buyer reference
      * @return string|null Buyer reference
      */
-    public function getBuyerReference(): ?string {
+    public function getBuyerReference() :  ? string {
+
         return $this->buyerReference;
     }
-
 
     /**
      * Set buyer reference
      * @param  string|null $buyerReference Buyer reference
      * @return self                        Invoice instance
      */
-    public function setBuyerReference(?string $buyerReference): self {
+    public function setBuyerReference( ? string $buyerReference) : self{
+
         $this->buyerReference = $buyerReference;
         return $this;
     }
-
 
     /**
      * Get purchase order reference
      * @return string|null Purchase order reference
      */
-    public function getPurchaseOrderReference(): ?string {
+    public function getPurchaseOrderReference() :  ? string {
+
         return $this->purchaseOrderReference;
     }
-
 
     /**
      * Set purchase order reference
      * @param  string|null $purchaseOrderReference Purchase order reference
      * @return self                                Invoice instance
      */
-    public function setPurchaseOrderReference(?string $purchaseOrderReference): self {
+    public function setPurchaseOrderReference( ? string $purchaseOrderReference) : self{
+
         $this->purchaseOrderReference = $purchaseOrderReference;
         return $this;
     }
-
 
     /**
      * Get sales order reference
      * @return string|null Sales order reference
      */
-    public function getSalesOrderReference(): ?string {
+    public function getSalesOrderReference() :  ? string {
+
         return $this->salesOrderReference;
     }
-
 
     /**
      * Set sales order reference
      * @param  string|null $salesOrderReference Sales order reference
      * @return self                             Invoice instance
      */
-    public function setSalesOrderReference(?string $salesOrderReference): self {
+    public function setSalesOrderReference( ? string $salesOrderReference) : self{
+
         $this->salesOrderReference = $salesOrderReference;
         return $this;
     }
-
 
     /**
      * Get tender or lot reference
      * @return string|null Tender or lot reference
      */
-    public function getTenderOrLotReference(): ?string {
+    public function getTenderOrLotReference() :  ? string {
+
         return $this->tenderOrLotReference;
     }
-
 
     /**
      * Set tender or lot reference
      * @param  string|null $tenderOrLotReference Tender or lot reference
      * @return self                              Invoice instance
      */
-    public function setTenderOrLotReference(?string $tenderOrLotReference): self {
+    public function setTenderOrLotReference( ? string $tenderOrLotReference) : self{
+
         $this->tenderOrLotReference = $tenderOrLotReference;
         return $this;
     }
-
 
     /**
      * Get contract reference
      * @return string|null Contract reference
      */
-    public function getContractReference(): ?string {
+    public function getContractReference() :  ? string {
+
         return $this->contractReference;
     }
-
 
     /**
      * Set contract reference
      * @param  string|null $contractReference Contract reference
      * @return self                           Invoice instance
      */
-    public function setContractReference(?string $contractReference): self {
+    public function setContractReference( ? string $contractReference) : self{
+
         $this->contractReference = $contractReference;
         return $this;
     }
-
 
     /**
      * Get invoice prepaid amount
      * @return float Invoice prepaid amount
      */
-    public function getPaidAmount(): float {
+    public function getPaidAmount() : float {
+
         return $this->paidAmount;
     }
-
 
     /**
      * Set invoice prepaid amount
      * @param  float $paidAmount Invoice prepaid amount
      * @return self              Invoice instance
      */
-    public function setPaidAmount(float $paidAmount): self {
+    public function setPaidAmount(float $paidAmount): self{
+
         $this->paidAmount = $paidAmount;
         return $this;
     }
-
 
     /**
      * Get invoice rounding amount
      * @return float Invoice rounding amount
      */
     public function getRoundingAmount(): float {
+
         return $this->roundingAmount;
     }
-
 
     /**
      * Set invoice rounding amount
      * @param  float $roundingAmount Invoice rounding amount
      * @return self                  Invoice instance
      */
-    public function setRoundingAmount(float $roundingAmount): self {
+    public function setRoundingAmount(float $roundingAmount): self{
+
         $this->roundingAmount = $roundingAmount;
         return $this;
     }
-
 
     /**
      * Get total VAT amount in VAT accounting currency
      * @return float|null Total amount in accounting currency
      */
-    public function getCustomVatAmount(): ?float {
+    public function getCustomVatAmount():  ? float {
+
         return $this->customVatAmount;
     }
-
 
     /**
      * Set total VAT amount in VAT accounting currency
      * @param  float|null  $customVatAmount Total amount in accounting currency
      * @return self                         Invoice instance
      */
-    public function setCustomVatAmount(?float $customVatAmount): self {
+    public function setCustomVatAmount( ? float $customVatAmount) : self{
+
         $this->customVatAmount = $customVatAmount;
         return $this;
     }
-
 
     /**
      * Get seller
      * @return Party|null Seller instance
      */
-    public function getSeller(): ?Party {
+    public function getSeller() :  ? Party {
+
         return $this->seller;
     }
-
 
     /**
      * Set seller
      * @param  Party $seller Seller instance
      * @return self          Invoice instance
      */
-    public function setSeller(Party $seller): self {
+    public function setSeller(Party $seller) : self{
+
         $this->seller = $seller;
         return $this;
     }
-
 
     /**
      * Get buyer
      * @return Party|null Buyer instance
      */
-    public function getBuyer(): ?Party {
+    public function getBuyer():  ? Party {
+
         return $this->buyer;
     }
-
 
     /**
      * Set buyer
      * @param  Party $buyer Buyer instance
      * @return self          Invoice instance
      */
-    public function setBuyer(Party $buyer): self {
+    public function setBuyer(Party $buyer) : self{
+
         $this->buyer = $buyer;
         return $this;
     }
-
 
     /**
      * Get payee
      * @return Party|null Payee instance
      */
-    public function getPayee(): ?Party {
+    public function getPayee():  ? Party {
+
         return $this->payee;
     }
-
 
     /**
      * Set payee
      * @param  Party|null $payee Payee instance
      * @return self              Invoice instance
      */
-    public function setPayee(?Party $payee): self {
+    public function setPayee( ? Party $payee) : self{
+
         $this->payee = $payee;
         return $this;
     }
-
 
     /**
      * Get delivery information
      * @return Delivery|null Delivery instance
      */
-    public function getDelivery(): ?Delivery {
+    public function getDelivery() :  ? Delivery {
+
         return $this->delivery;
     }
-
 
     /**
      * Set delivery information
      * @param  Delivery|null $delivery Delivery instance
      * @return self                    Invoice instance
      */
-    public function setDelivery(?Delivery $delivery): self {
+    public function setDelivery( ? Delivery $delivery) : self{
+
         $this->delivery = $delivery;
         return $this;
     }
-
 
     /**
      * Get payment information
      * @return Payment|null Payment instance
      */
-    public function getPayment(): ?Payment {
+    public function getPayment() :  ? Payment {
+
         return $this->payment;
     }
-
 
     /**
      * Set payment information
      * @param  Payment|null $payment Payment instance
      * @return self                  Invoice instance
      */
-    public function setPayment(?Payment $payment): self {
+    public function setPayment( ? Payment $payment) : self{
+
         $this->payment = $payment;
         return $this;
     }
-
 
     /**
      * Get invoice lines
      * @return InvoiceLine[] Invoice lines
      */
-    public function getLines(): array {
+    public function getLines() : array{
+
         return $this->lines;
     }
-
 
     /**
      * Add invoice line
      * @param  InvoiceLine $line Invoice line instance
      * @return self              Invoice instance
      */
-    public function addLine(InvoiceLine $line): self {
+    public function addLine(InvoiceLine $line): self{
+
         $this->lines[] = $line;
         return $this;
     }
-
 
     /**
      * Remove invoice line
@@ -866,29 +870,32 @@ class Invoice {
      * @throws OutOfBoundsException if line index is out of bounds
      */
     public function removeLine(int $index): self {
+
         if ($index < 0 || $index >= count($this->lines)) {
             throw new OutOfBoundsException('Could not find line by index inside invoice');
         }
+
         array_splice($this->lines, $index, 1);
         return $this;
     }
-
 
     /**
      * Clear all invoice lines
      * @return self Invoice instance
      */
-    public function clearLines(): self {
+    public function clearLines(): self{
+
         $this->lines = [];
         return $this;
     }
-
 
     /**
      * Get invoice total
      * @return InvoiceTotals Invoice totals
      */
     public function getTotals(): InvoiceTotals {
+
         return InvoiceTotals::fromInvoice($this);
     }
+
 }

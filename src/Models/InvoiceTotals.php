@@ -3,9 +3,9 @@ namespace PhenyxInvoicing\Models;
 
 use PhenyxInvoicing\Invoice;
 use PhenyxInvoicing\Traits\VatTrait;
-use function array_values;
 
 class InvoiceTotals {
+
     /**
      * Invoice currency code
      * @var string
@@ -53,7 +53,7 @@ class InvoiceTotals {
      * @var float
      */
     public $taxInclusiveAmount = 0;
-    
+
     /**
      * The sum of amounts which have been paid in advance
      * @var float
@@ -90,6 +90,7 @@ class InvoiceTotals {
      * @return self         Totals instance
      */
     static public function fromInvoice(Invoice $inv): InvoiceTotals {
+
         $totals = new self();
         $vatMap = [];
 
@@ -98,39 +99,48 @@ class InvoiceTotals {
         $totals->vatCurrency = $inv->getVatCurrency();
 
         // Process all invoice lines
+
         foreach ($inv->getLines() as $line) {
             $lineNetAmount = $inv->round($line->getNetAmount() ?? 0.0, 'line/netAmount');
             $totals->netAmount += $lineNetAmount;
             self::updateVatMap($vatMap, $line, $lineNetAmount);
         }
+
         $totals->netAmount = $inv->round($totals->netAmount, 'invoice/netAmount');
 
         // Process allowances
+
         foreach ($inv->getAllowances() as $item) {
             $allowanceAmount = $inv->round($item->getEffectiveAmount($totals->netAmount), 'line/allowanceChargeAmount');
             $totals->allowancesAmount += $allowanceAmount;
             self::updateVatMap($vatMap, $item, -$allowanceAmount);
         }
+
         $totals->allowancesAmount = $inv->round($totals->allowancesAmount, 'invoice/allowancesChargesAmount');
 
         // Process charges
+
         foreach ($inv->getCharges() as $item) {
             $chargeAmount = $inv->round($item->getEffectiveAmount($totals->netAmount), 'line/allowanceChargeAmount');
             $totals->chargesAmount += $chargeAmount;
             self::updateVatMap($vatMap, $item, $chargeAmount);
         }
+
         $totals->chargesAmount = $inv->round($totals->chargesAmount, 'invoice/allowancesChargesAmount');
 
         // Calculate VAT amounts
+
         foreach ($vatMap as $item) {
             $item->taxableAmount = $inv->round($item->taxableAmount, 'invoice/allowancesChargesAmount');
             $item->taxAmount = $inv->round($item->taxableAmount * ($item->rate / 100), 'invoice/vatAmount');
             $totals->vatAmount += $item->taxAmount;
         }
+
         $totals->vatAmount = $inv->round($totals->vatAmount, 'invoice/vatAmount');
 
         // Add custom VAT amount
         $totals->customVatAmount = $inv->getCustomVatAmount();
+
         if ($totals->customVatAmount !== null) {
             $totals->customVatAmount = $inv->round($inv->getCustomVatAmount(), 'invoice/vatAmount');
         }
@@ -157,7 +167,6 @@ class InvoiceTotals {
         return $totals;
     }
 
-
     /**
      * Update VAT map
      * @param VatBreakdown[string] &$vatMap          VAT map reference
@@ -166,11 +175,13 @@ class InvoiceTotals {
      * @param float                $addTaxableAmount Taxable amount to add
      */
     static private function updateVatMap(array &$vatMap, $item, float $addTaxableAmount) {
+
         $category = $item->getVatCategory();
         $rate = $item->getVatRate();
         $key = "$category:$rate";
 
         // Initialize VAT breakdown
+
         if (!isset($vatMap[$key])) {
             $vatMap[$key] = new VatBreakdown();
             $vatMap[$key]->category = $category;
@@ -180,9 +191,11 @@ class InvoiceTotals {
         // Update exemption reason (last item overwrites previous ones)
         $exemptionReasonCode = $item->getVatExemptionReasonCode();
         $exemptionReason = $item->getVatExemptionReason();
+
         if ($exemptionReasonCode !== null) {
             $vatMap[$key]->exemptionReasonCode = $exemptionReasonCode;
         }
+
         if ($exemptionReason !== null) {
             $vatMap[$key]->exemptionReason = $exemptionReason;
         }
@@ -190,4 +203,5 @@ class InvoiceTotals {
         // Increase taxable amount
         $vatMap[$key]->taxableAmount += $addTaxableAmount;
     }
+
 }

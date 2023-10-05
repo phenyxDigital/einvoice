@@ -4,6 +4,7 @@ namespace PhenyxInvoicing\Writers;
 use PhenyxInvoicing\Invoice;
 
 abstract class AbstractWriter {
+
     /**
      * Export invoice
      * @param  Invoice $invoice Invoice instance

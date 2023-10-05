@@ -9,6 +9,7 @@ use PhenyxInvoicing\Traits\PeriodTrait;
 use PhenyxInvoicing\Traits\VatTrait;
 
 class InvoiceLine {
+
     protected $id = null;
     protected $orderLineReference = null;
     protected $name = null;
@@ -38,7 +39,7 @@ class InvoiceLine {
         return $this->id;
     }
 
-
+    
     /**
      * Set invoice line identifier
      * @param  string $id Invoice line identifier

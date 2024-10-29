@@ -1,7 +1,7 @@
 {
-    "name": "phenyxdigitale/einvoice",
+    "name": "phenyxdigital/einvoice",
     "description": "Library for reading and creating European-compliant electronic invoices (EN 16931)",  
-    "homepage": "https://github.com/phenyxdigitale/einvoice",
+    "homepage": "https://github.com/phenyxdigital/einvoice",
     "type": "library",
     "license": "MIT",
     "authors": [
